@@ -11,12 +11,11 @@ control over how data points are grouped to create a heatmap.
 Most heatmaps provide little control over how data is grouped beyond a pixel radius.
 For many use-cases that is not enough - we often need to know exactly what data is in each cluster.
 
-# how?
-This plugin provides two ways of doing this better:
+## how?
+This plugin provides two ways of doing this better, you can either:
 
-1. Allows you to define the radius in **meters** instead of pixels.
-2. Allows you to define a grid of square cells which are used for value binning.
-
+1. Define the radius in *meters* instead of pixels; and/or
+2. Define a grid of cells which are used for value binning.
 
 
 ## License
