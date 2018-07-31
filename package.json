@@ -1,0 +1,37 @@
+{
+  "name": "leaflet-heatbin",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/leaflet-heatbin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danwild/leaflet-heatbin.git"
+  },
+  "keywords": [
+    "leaflet",
+    "heatmap",
+    "visualisation"
+  ],
+  "author": "danwild@y7mail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/danwild/leaflet-heatbin/issues"
+  },
+  "homepage": "https://github.com/danwild/leaflet-heatbin#readme",
+  "dependencies": {
+    "heatmap.js": "^2.0.5",
+    "@turf/turf": "^5.1.6"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.9.0",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^6.1.2",
+    "rollup": "^0.63.4",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-commonjs": "^9.1.3",
+    "rollup-plugin-node-resolve": "^3.3.0"
+  }
+}
