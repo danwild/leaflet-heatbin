@@ -62,6 +62,16 @@ To use this plugin, you either need to:
  - load these dependencies yourself (prior to loading `leaflet-heatbin`); or
  - use the standalone version with dependencies bundled, in `dist/leaflet-heatbin-standalone.js`
 
+## public methods
+
+|method|params|description|
+|---|---|---|
+|`isActive`||check if the particle layer is currently active on the map|
+|`setData`|`data: {Object}`|update the layer with new data object|
+|`update`||update the layer/trigger redraw|
+|`getLatLngBounds`|`data: {Object}`, optional|Returns leaflet [LatLngBounds](https://leafletjs.com/reference-1.3.2.html#latlngbounds) of supplied, or layer data|
+|`getGridInfo`||Get information about the grid used for binning|
+
 ## binning?
 When binning is enabled, a grid of cells is generated using
 [turf](https://github.com/Turfjs/turf), which is then used to cluster data points by grid cell indices.

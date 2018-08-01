@@ -745,6 +745,11 @@
 			this._max = 1;
 			this._min = 0;
 			this.cfg.container = this._el;
+
+			this._gridBBOX = null;
+			this._xCellLength = null;
+			this._yCellLength = null;
+			this._totalGridCells = null;
 		},
 
 		onAdd: function (map) {
@@ -758,7 +763,6 @@
 			this._el.style.width = size.x + 'px';
 			this._el.style.height = size.y + 'px';
 			this._el.style.position = 'absolute';
-
 			this._origin = this._map.layerPointToLatLng(new L.Point(0, 0));
 
 			map.getPanes().overlayPane.appendChild(this._el);
@@ -766,6 +770,8 @@
 			if (!this._heatmap) {
 				this._heatmap = heatmap.create(this.cfg);
 			}
+
+			this._isActive = true;
 
 			// this resets the origin and redraws whenever
 			// the zoom changed or the map has been moved
@@ -782,9 +788,14 @@
 			// remove layer's DOM elements and listeners
 			map.getPanes().overlayPane.removeChild(this._el);
 			map.off('moveend', this._reset, this);
+			this._isActive = false;
 		},
 
 		/*--------------------------------------------- PUBLIC ---------------------------------------------*/
+
+		isActive: function () {
+			return this._isActive;
+		},
 
 		/**
 	  * Returns leaflet LatLngBounds of the layer data
@@ -899,6 +910,18 @@
 			this._draw();
 		},
 
+		/**
+	  * Returns information about the heatBin grid
+	  */
+		getGridInfo: function () {
+			return {
+				bbox: this._gridBBOX,
+				xCellLength: this._xCellLength,
+				yCellLength: this._yCellLength,
+				totalCellLength: this._totalGridCells
+			};
+		},
+
 		/*--------------------------------------------- PRIVATE ---------------------------------------------*/
 
 		_draw: function () {
@@ -958,10 +981,6 @@
 			// minX, minY, maxX, maxY
 			const bbox = [bounds.getWest(), bounds.getNorth(), bounds.getEast(), bounds.getSouth()];
 
-			const bottomLeft = [bounds.getWest(), bounds.getSouth()];
-			const bottomRight = [bounds.getEast(), bounds.getSouth()];
-			const topLeft = [bounds.getWest(), bounds.getNorth()];
-
 			// CREATE A GRID OF CELLS
 			// GRID origin is bottomRight
 			// the indexes increment by:
@@ -973,7 +992,6 @@
 			grid.features.forEach((f, index) => {
 				f.properties['index'] = index;
 			});
-			console.log(grid);
 
 			// DEBUG - plot the binning grid on map
 			if (this.cfg.heatBin && this.cfg.heatBin.showBinGrid) {
@@ -981,6 +999,7 @@
 					style: function (feature) {
 						return {
 							weight: 1,
+							opacity: 0.7,
 							fill: false
 						};
 					},
@@ -990,17 +1009,25 @@
 				}).addTo(this._map);
 			}
 
+			// minX, minY, maxX, maxY
+			this._gridBBOX = turf.bbox(grid);
+
 			// calc XY lengths
-			const xGridLength = turf.distance(turf.point(bottomLeft), turf.point(bottomRight), { units: 'kilometers' });
-			const yGridLength = turf.distance(turf.point(bottomLeft), turf.point(topLeft), { units: 'kilometers' });
-			console.log(`xGridLenth: ${xGridLength}, yGridLenth: ${yGridLength}`);
+			// change to use actual features..
+			const gridBottomLeft = turf.point([this._gridBBOX[0], this._gridBBOX[1]]);
+			const gridBottomRight = turf.point([this._gridBBOX[2], this._gridBBOX[1]]);
+			const gridTopLeft = turf.point([this._gridBBOX[0], this._gridBBOX[3]]);
+			const xGridLength = turf.distance(gridBottomLeft, gridBottomRight, { units: 'kilometers' });
+			const yGridLength = turf.distance(gridBottomLeft, gridTopLeft, { units: 'kilometers' });
 
 			// calc XY cell length of grid
-			const xCellLength = Math.floor(xGridLength / lengthKm);
-			const yCellLength = Math.floor(yGridLength / lengthKm);
-			const totalCells = xCellLength * yCellLength;
-			console.log(`xCellLenth: ${xCellLength}, yCellLenth: ${yCellLength}`);
-			console.log(`total cells: ${totalCells}`);
+			this._xCellLength = Math.round(xGridLength / lengthKm);
+			this._yCellLength = Math.round(yGridLength / lengthKm);
+			this._totalGridCells = this._xCellLength * this._yCellLength;
+
+			console.log(`xGridLenth: ${this.xGridLength}, yGridLenth: ${this.yGridLength}`);
+			console.log(`xCellLenth: ${this._xCellLength}, yCellLenth: ${this._yCellLength}`);
+			console.log(`total cells: ${this._totalGridCells}`);
 
 			// PUT EACH POINT INTO A CELL
 			const points = data.map(d => {
@@ -1014,26 +1041,27 @@
 			points.forEach(p => {
 
 				// point dist from left
-				const xDist = turf.distance(turf.point([p.lng, p.lat]), turf.point([bounds.getEast(), p.lat]), { units: 'kilometers' });
+				let xDist = turf.distance(turf.point([p.lng, p.lat]), turf.point([this._gridBBOX[2], p.lat]), { units: 'kilometers' });
 				// point dist from bottom
-				const yDist = turf.distance(turf.point([p.lng, p.lat]), turf.point([p.lng, bounds.getSouth()]), { units: 'kilometers' });
+				let yDist = turf.distance(turf.point([p.lng, p.lat]), turf.point([p.lng, this._gridBBOX[1]]), { units: 'kilometers' });
+				// points *can* fall outside the grid bounds, which doesn't
+				// exactly match the data bounds, pull them back into nearest cell
+				if (yDist > yGridLength) yDist = yGridLength - lengthKm / 2;
+				if (xDist > xGridLength) xDist = xGridLength - lengthKm / 2;
 
 				// find the XY cell indices
-				let xCell = Math.round(xDist / lengthKm);
-				let yCell = Math.round(yDist / lengthKm);
+				let xCell = Math.floor(xDist / lengthKm);
+				let yCell = Math.floor(yDist / lengthKm);
 
 				// translate 2D index into 1D index
-				let i = xCell * yCellLength + yCell;
-				if (i >= totalCells) i = totalCells - 1;
+				let i = xCell * this._yCellLength + yCell;
+				if (i >= this._totalGridCells) return i = this._totalGridCells - 1;
 
 				if (grid.features[i].properties.count) {
 					grid.features[i].properties.count++;
 				} else {
 					grid.features[i].properties['count'] = 1;
 				}
-			});
-			grid.features.forEach(f => {
-				if (f.properties.count > 0) ;
 			});
 
 			// USE EACH CELL AS A HEATMAP DATA POINT

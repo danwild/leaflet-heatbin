@@ -1,6 +1,6 @@
 {
   "name": "leaflet-heatbin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Leafet heatmap that provides binning of values using formally defined grid cells",
   "main": "dist/leaflet-heatbin.js",
   "scripts": {
