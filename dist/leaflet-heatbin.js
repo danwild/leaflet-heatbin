@@ -1,6 +1,6 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('heatmap.js'), require('turf')) :
-	typeof define === 'function' && define.amd ? define(['heatmap.js', 'turf'], factory) :
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('heatmap.js'), require('@turf/turf')) :
+	typeof define === 'function' && define.amd ? define(['heatmap.js', '@turf/turf'], factory) :
 	(global['leaflet-heatbin'] = factory(global.h337,global.turf));
 }(this, (function (h337,turf) { 'use strict';
 

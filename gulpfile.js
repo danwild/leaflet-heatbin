@@ -14,7 +14,7 @@ gulp.task('scripts', function() {
 			name: 'leaflet-heatbin',
 			globals: {
 				'heatmap.js': 'h337',
-				'turf': 'turf'
+				'@turf/turf': '@turf/turf'
 			}
 		},
 		plugins: [
@@ -37,7 +37,7 @@ gulp.task('scripts', function() {
 			})
 		],
 		// indicate which modules should be treated as external
-		external: ['heatmap.js', 'turf']
+		external: ['heatmap.js', '@turf/turf']
 	})
 
 	// and output to ./dist/app.js as normal.

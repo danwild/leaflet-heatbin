@@ -1,5 +1,5 @@
 import h337 from 'heatmap.js';
-import turf from 'turf';
+import turf from '@turf/turf';
 
 const HeatBin = (L.Layer ? L.Layer : L.Class).extend({
 
