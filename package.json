@@ -1,7 +1,7 @@
 {
   "name": "leaflet-heatbin",
-  "version": "0.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Leafet heatmap that provides binning of values using formally defined grid cells",
   "main": "dist/leaflet-heatbin.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -17,6 +17,58 @@ This plugin provides two ways of doing this better, you can either:
 1. Define the radius in *meters* instead of pixels; and/or
 2. Define a grid of cells which are used for value binning.
 
+## cell binning example
+```javascript
+// define options
+const options = {
+  heatBin: {
+    enabled:     true,
+    cellSizeKm:  0.25, // e.g. bin values into 250m grid cells
+    maxFactor:   0.8,  // heatmap max value will be multiplied by maxFactor
+    showBinGrid: false // a debugging option, plots the binning grid on the map*
+  },
+  // plus any options from heatmap.js core
+  radius: 20,
+  useLocalExtrema: true,
+  onExtremaChange: function(data) {
+    console.log(data);
+  }
+};
+const layer = heatBin(options);
+layer.setData(myData);
+```
+
+## meter radius example
+```javascript
+// define options
+const options = {
+  fixedRadius: true,
+  radiusMeters: 100
+};
+const layer = heatBin(options);
+layer.setData(myData);
+```
+
+## install, use
+
+`npm install leaflet-heatbin --save`
+
+This plugin has external dependencies:
+- [heatmap.js](https://github.com/pa7/heatmap.js)
+- [turf](https://github.com/Turfjs/turf)
+
+To use this plugin, you either need to:
+ - load these dependencies yourself (prior to loading `leaflet-heatbin`); or
+ - use the standalone version with dependencies bundled, in `dist/leaflet-heatbin-standalone.js`
+
+## binning?
+When binning is enabled, a grid of cells is generated using
+[turf](https://github.com/Turfjs/turf), which is then used to cluster data points by grid cell indices.
+
+If you're interested to see how your data is being gridded, you can set the `showBinGrid`
+to true to see the grid at work:
+
+![Screenshot](/screenshots/grid.png?raw=true)
 
 ## License
 MIT License (MIT)

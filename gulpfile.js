@@ -52,10 +52,51 @@ gulp.task('scripts', function() {
 
 });
 
+// bundles npm dependencies into standalone dist file
+gulp.task('bundle', function() {
+
+	return rollup.rollup({
+			input: './src/L.HeatBin.js',
+			output: {
+				format: 'umd',
+				name: 'leaflet-heatbin-standalone'
+			},
+			plugins: [
+				babel({
+					exclude: 'node_modules/**' // only transpile our source code
+				}),
+				nodeResolve({
+					// pass custom options to the resolve plugin
+					customResolveOptions: {
+						moduleDirectory: 'node_modules'
+					},
+					jsnext: true,
+					module: true,
+					main: true,  // for commonjs modules that have an index.js
+					browser: true
+				}),
+				commonjs({
+					include: 'node_modules/**'
+				})
+			]
+		})
+
+		// and output to ./dist/app.js as normal.
+		.then(bundle => {
+			return bundle.write({
+				file: './dist/leaflet-heatbin-standalone.js',
+				format: 'umd',
+				name: 'leaflet-heatbin',
+				sourcemap: true
+			});
+		});
+
+});
+
 // Watch Files For Changes
 gulp.task('watch', function() {
-	return gulp.watch('src/*.js', gulp.series('scripts'));
+	return gulp.watch('src/*.js', gulp.series('scripts', 'bundle'));
 });
 
 // Default Task
-gulp.task('default', gulp.series('scripts', 'watch'));
+gulp.task('default', gulp.series('scripts', 'bundle', 'watch'));
