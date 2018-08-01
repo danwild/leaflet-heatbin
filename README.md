@@ -9,6 +9,7 @@ control over how data points are grouped to create a heatmap.
 
 ## why?
 Most heatmaps provide little control over how data is grouped beyond a pixel radius.
+
 For many use-cases that is not enough - we often need to know exactly what data is in each cluster.
 
 ## how?
@@ -34,7 +35,7 @@ const options = {
     console.log(data);
   }
 };
-const layer = heatBin(options);
+const layer = L.heatBin(options);
 layer.setData(myData);
 ```
 
@@ -45,7 +46,7 @@ const options = {
   fixedRadius: true,
   radiusMeters: 100
 };
-const layer = heatBin(options);
+const layer = L.heatBin(options);
 layer.setData(myData);
 ```
 
