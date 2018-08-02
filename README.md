@@ -50,6 +50,23 @@ const layer = L.heatBin(options);
 layer.setData(myData);
 ```
 
+## data format
+
+Essentially the same as vanilla
+[heatmap.js](https://github.com/pa7/heatmap.js), with the addition of an optional param: `uid`.
+When `uid` is specified and heatBin is enabled, a data point is only counted *once* per cell, per `uid`.
+
+```javascript
+const points = [
+  {
+    lat:   '<lat>',
+    lng:   '<lng>'',
+    value: 10,
+    uid:   '<uid>' // optional
+  }
+]
+```
+
 ## install, use
 
 `npm install leaflet-heatbin --save`

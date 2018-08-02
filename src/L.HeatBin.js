@@ -182,7 +182,10 @@ const HeatBin = (L.Layer ? L.Layer : L.Class).extend({
 			bbox:            this._gridBBOX,
 			xCellLength:     this._xCellLength,
 			yCellLength:     this._yCellLength,
-			totalCellLength: this._totalGridCells
+			totalCellLength: this._totalGridCells,
+			maxFactor:       this._maxFactor,
+			minCellCount:    this._minCellCount,
+			maxCellCount:    this._maxCellCount
 		}
 	},
 
@@ -299,7 +302,8 @@ const HeatBin = (L.Layer ? L.Layer : L.Class).extend({
 		// PUT EACH POINT INTO A CELL
 		const points = data.map((d) => { return {
 			lat: d[this._latField],
-			lng: d[this._lngField]
+			lng: d[this._lngField],
+			uid: d['uid'] || null
 		}; });
 
 		// for each point get its offset from minX and minY
@@ -330,23 +334,37 @@ const HeatBin = (L.Layer ? L.Layer : L.Class).extend({
 			let i = (xCell * this._yCellLength) + yCell;
 			if (i >= this._totalGridCells) return i = this._totalGridCells - 1;
 
+			// only count unique if using uid
 			if (grid.features[i].properties.count) {
-				grid.features[i].properties.count++
+				if (p.uid !== null && grid.features[i].properties.uids.indexOf(p.uid) === -1){
+					grid.features[i].properties.count++;
+					grid.features[i].properties.uids.push(p.uid);
+				}
+			// add first count
 			} else {
 				grid.features[i].properties['count'] = 1;
+				if (p.uid !== null) grid.features[i].properties.uids = [p.uid];
 			}
 
 		});
 
 		// USE EACH CELL AS A HEATMAP DATA POINT
 		let heatmapCells = [];
+
+		this._minCellCount = 0;
+		this._maxCellCount = 0;
+
 		grid.features.forEach((f) => {
 			if (f.properties.count) {
 				let centroid = turf.centroid(f);
+
+				if (f.properties.count < this._minCellCount) this._minCellCount = f.properties.count;
+				if (f.properties.count > this._maxCellCount) this._maxCellCount = f.properties.count;
+
 				heatmapCells.push({
 					lat:   centroid.geometry.coordinates[1],
 					lng:   centroid.geometry.coordinates[0],
-					value: f.properties.count
+					value: f.properties.count + 1
 				});
 			}
 		});
